@@ -25,16 +25,16 @@
 /* MAXRESERVED = the number of reserved words */
 #define MAXRESERVED 8
 
-typedef enum 
+typedef enum {
     /* book-keeping tokens */
-   {ENDFILE,ERROR,
+    ENDFILE,ERROR,
     /* reserved words */
     IF,THEN,ELSE,END,REPEAT,UNTIL,READ,WRITE,
     /* multicharacter tokens */
     ID,NUM,
     /* special symbols */
     ASSIGN,EQ,LT,PLUS,MINUS,TIMES,OVER,LPAREN,RPAREN,SEMI
-   } TokenType;
+} TokenType;
 
 extern FILE* source; /* source code text file */
 // 输出文件

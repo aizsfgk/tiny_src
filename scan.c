@@ -30,16 +30,20 @@ static int EOF_flag = FALSE; /* corrects ungetNextChar behavior on EOF */
    from lineBuf, reading in a new line if lineBuf is
    exhausted */
 static int getNextChar(void)
-{ if (!(linepos < bufsize))
-  { lineno++;
+{ 
+  if (!(linepos < bufsize))
+  { 
+    lineno++;
     if (fgets(lineBuf,BUFLEN-1,source))
-    { if (EchoSource) fprintf(listing,"%4d: %s",lineno,lineBuf);
+    { 
+      if (EchoSource) fprintf(listing,"%4d: %s",lineno,lineBuf);
       bufsize = strlen(lineBuf);
       linepos = 0;
       return lineBuf[linepos++];
     }
     else
-    { EOF_flag = TRUE;
+    { 
+      EOF_flag = TRUE;
       return EOF;
     }
   }
@@ -49,9 +53,13 @@ static int getNextChar(void)
 /* ungetNextChar backtracks one character
    in lineBuf */
 static void ungetNextChar(void)
-{ if (!EOF_flag) linepos-- ;}
+{ 
+  if (!EOF_flag) linepos-- ;
+}
 
 /* lookup table of reserved words */
+// 记录表-查找表
+// 用来查找关键字
 static struct
     { char* str;
       TokenType tok;
@@ -63,8 +71,11 @@ static struct
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */
 static TokenType reservedLookup (char * s)
-{ int i;
+{ 
+  int i;
   for (i=0;i<MAXRESERVED;i++)
+    // 只有相等的情况下，才返回关键字
+    // 否则还是标识符
     if (!strcmp(s,reservedWords[i].str))
       return reservedWords[i].tok;
   return ID;
@@ -83,13 +94,18 @@ TokenType getToken(void)
    TokenType currentToken;
    /* current state - always begins at START */
    StateType state = START;
+
    /* flag to indicate save to tokenString */
    int save;
    while (state != DONE)
-   { int c = getNextChar();
+   { 
+     // 获取下一个字符
+     int c = getNextChar();
+     // 是否将一个字符增加到tokenString中
      save = TRUE;
      switch (state)
-     { case START:
+     { 
+       case START:
          if (isdigit(c))
            state = INNUM;
          else if (isalpha(c))
@@ -99,13 +115,16 @@ TokenType getToken(void)
          else if ((c == ' ') || (c == '\t') || (c == '\n'))
            save = FALSE;
          else if (c == '{')
-         { save = FALSE;
+         { 
+           save = FALSE;
            state = INCOMMENT;
          }
          else
-         { state = DONE;
+         { 
+           state = DONE;
            switch (c)
-           { case EOF:
+           { 
+             case EOF:
                save = FALSE;
                currentToken = ENDFILE;
                break;
@@ -145,10 +164,12 @@ TokenType getToken(void)
        case INCOMMENT:
          save = FALSE;
          if (c == EOF)
-         { state = DONE;
+         { 
+           state = DONE;
            currentToken = ENDFILE;
          }
-         else if (c == '}') state = START;
+         else if (c == '}') 
+          state = START;
          break;
        case INASSIGN:
          state = DONE;
@@ -164,6 +185,7 @@ TokenType getToken(void)
        case INNUM:
          if (!isdigit(c))
          { /* backup in the input */
+
            ungetNextChar();
            save = FALSE;
            state = DONE;
@@ -186,10 +208,14 @@ TokenType getToken(void)
          currentToken = ERROR;
          break;
      }
+     // 
      if ((save) && (tokenStringIndex <= MAXTOKENLEN))
        tokenString[tokenStringIndex++] = (char) c;
      if (state == DONE)
-     { tokenString[tokenStringIndex] = '\0';
+     { 
+       tokenString[tokenStringIndex] = '\0';
+       // 如果是标识符
+       // 
        if (currentToken == ID)
          currentToken = reservedLookup(tokenString);
      }
